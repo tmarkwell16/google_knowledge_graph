@@ -24,7 +24,9 @@ function google_knowledge_graph_permission() {
 // ===========================
 
 function google_knowledge_graph_menu() {
-	$item['admin/config/system/googlekg'] = array(
+	$items = array();
+	
+	$items['admin/config/system/googlekg'] = array(
 		'title' => t('Google Knowledge Graph Settings'),
 		'description' => t('Google Knowledge Graph Settings'),
 		'page callback' => 'drupal_get_form',
@@ -40,8 +42,18 @@ function google_knowledge_graph_menu() {
 
 function google_knowledge_graph_admin_settings() {
 	$form['company_info'] = array(
-		'#title' => t('Company Information'),
 		'#type' => 'fieldset',
+		'#title' => t('Company Information'),
+		'#collapsible' => TRUE,
+		'#collapse' => FALSE,
+	);
+	$form['company_info']['co_name'] = array(
+		'#type' => 'textfield',
+		'#title' => t('Company Name'),
+		'#default_value' => 'test',
+		'#size' => 60,
+		'#maxlength' => 128,
+		'#required' => TRUE,
 	);
 	return $form;
 }
