@@ -43,4 +43,5 @@ function google_knowledge_graph_admin_settings() {
 		'#title' => t('Company Information'),
 		'#type' => 'fieldset',
 	);
+	return $form;
 }
