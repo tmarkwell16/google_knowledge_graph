@@ -15,7 +15,7 @@ function google_knowledge_graph_permission() {
 			'title' => t('Administer Google Knowledge Graph'),
 			'description' => t('Configure Google Knowledge Graph settings.'),
 		),
-	):
+	);
 	return $permission;
 }
 
