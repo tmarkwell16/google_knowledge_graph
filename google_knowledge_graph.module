@@ -1,0 +1,46 @@
+<?php
+
+/**
+*	@file
+* Generate JSON-LD code for Google Knowledge Graph.
+**/
+
+// =================================
+// = Implements hook_permission(). =
+// =================================
+
+function google_knowledge_graph_permission() {
+	$permission = array(
+		'administer google kg' => array(
+			'title' => t('Administer Google Knowledge Graph'),
+			'description' => t('Configure Google Knowledge Graph settings.'),
+		),
+	):
+	return $permission;
+}
+
+// ===========================
+// = Implements hook_menu(). =
+// ===========================
+
+function google_knowledge_graph_menu() {
+	$item['admin/config/system/googlekg'] = array(
+		'title' => t('Google Knowledge Graph Settings'),
+		'description' => t('Google Knowledge Graph Settings'),
+		'page callback' => 'drupal_get_form',
+		'page arguments' => array('google_knowledge_graph_admin_settings'),
+		'access arguments' => array('administer google kg'),
+	);
+	return $items;
+}
+
+// =================================
+// = Construct admin settings form =
+// =================================
+
+function google_knowledge_graph_admin_settings() {
+	$form['company_info'] = array(
+		'#title' => t('Company Information'),
+		'#type' => 'fieldset',
+	);
+}
