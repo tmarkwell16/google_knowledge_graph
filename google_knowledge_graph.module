@@ -346,7 +346,17 @@ function google_knowledge_graph_preprocess_html(&$variables) {
 			$blog_pub_date = date('Y-m-dTH:i:s', $node->created);
 			$blog_change_date = date('Y-m-dTH:i:s', $node->changed);
 			$blog_author = $user->name;
-			$blog_desc = $node->body[LANGUAGE_NONE][0]['safe_summary'];
+			
+			// We will first check for a meta description field, then fall back to
+			// the body summary, and finally, manually trim the body field to create a description.
+			
+			if ($node->field__meta_description) {
+				$blog_desc = $node->field__meta_description[LANGUAGE_NONE][0]['metatags_quick'];
+			} elseif (!empty($node->body[LANGUAGE_NONE][0]['safe_summary'])) {
+				$blog_desc = $node->body[LANGUAGE_NONE][0]['safe_summary'];
+			} else {
+				$blog_desc = substr(strip_tags($node->body[LANGUAGE_NONE][0]['value']), 0, 160) . '...';
+			}
 			
 			$blog_markup = '<script type="application/ld+json">
 				{
