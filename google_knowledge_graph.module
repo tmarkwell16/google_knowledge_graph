@@ -124,6 +124,7 @@ function google_knowledge_graph_admin_settings() {
 		'#description' => t('Enter a fully qualified URL to your company logo file. 
 			Leave the default value if you have a logo uploaded to your current theme.'),
 		'#default_value' => variable_get('co_logo', theme_get_setting('logo')),
+		'#required' => TRUE,
 	);
 	$form['company_info']['co_map'] = array(
 		'#type' => 'textfield',
@@ -287,7 +288,7 @@ function google_knowledge_graph_preprocess_html(&$variables) {
 	$co_area_served = variable_get('co_area_served', '');
 	$co_logo = variable_get('co_logo', '');
 	$co_map = variable_get('co_map', '');
-	$markup = '<script type="application/ld+json">
+	$co_markup = '<script type="application/ld+json">
 		{ "@context": "http://schema.org/",
 			"@type": "' . $co_type . '",
 			"name": "' . $co_name . '",
@@ -301,19 +302,84 @@ function google_knowledge_graph_preprocess_html(&$variables) {
 			"telephone": "' . $co_phone . '",
 			"url": "' . $co_url . '",';
 	if ($co_area_type !== 'Select Area Type') {
-		$markup .= '"areaServed": {
+		$co_markup .= '"areaServed": {
 				"@type": "' . $co_area_type . '",
 				"name": "' . $co_area_served . '"
 				},';
 	}
-	$markup .= '"maps": "' . $co_map . '",
-			"logo": "' . $co_logo . '"
+	if (!empty($co_map)) {
+		$co_markup .= '"maps": "'. $co_map . '",';
+	}
+	$co_markup .= '"logo": "' . $co_logo . '"
 			}</script>';
 			
-	$element = array(
+	$co_element = array(
 		'#type' => 'markup',
-		'#markup' => $markup,
+		'#markup' => $co_markup,
 	);
 	
-	drupal_add_html_head($element, 'gkg');
+	drupal_add_html_head($co_element, 'co-gkg');
+	
+	// Check if the node type is article.
+	// Load node and initiate variables for generating the blog knowledge graph code.
+		
+	if ($variables['classes_array'][4] == 'page-node') {
+		if ($variables['classes_array'][7] == 'node-type-article') {
+			$nid = $variables['classes_array'][6];
+			$nid = explode('-', $nid);
+			$node = node_load($nid[2]);
+			$user = user_load($node->uid);
+			
+			global $base_url;
+			$url_alias = '/' . drupal_get_path_alias('node/'.$nid[2]);
+			$blog_url = $base_url . $url_alias;
+			$blog_title = $node->title;
+			$blog_image = file_create_url($node->field_image[LANGUAGE_NONE][0]['uri']);
+			$blog_image_width = $node->field_image[LANGUAGE_NONE][0]['width'];
+			$blog_image_height = $node->field_image[LANGUAGE_NONE][0]['height'];
+			$blog_pub_date = date('Y-m-dTH:i:s', $node->created);
+			$blog_change_date = date('Y-m-dTH:i:s', $node->changed);
+			$blog_author = $user->name;
+			$blog_desc = $node->body[LANGUAGE_NONE][0]['safe_summary'];
+			
+			$blog_markup = '<script type="application/ld+json">
+				{
+					"@context": "http://schema.org",
+					"@type": "BlogPosting",
+					"mainEntityOfPage": {
+						"@type": "WebPage",
+						"@id": "' . $blog_url . '"
+					},
+					"headline": "' . $blog_title . '",
+					"image": {
+						"@type": "ImageObject",
+						"url": "' . $blog_image . '",
+						"width": "' . $blog_image_width . '",
+						"height": "' . $blog_image_height . '"
+					},
+					"datePublished": "' . $blog_pub_date . '",
+					"dateModified": "' . $blog_change_date . '",
+					"author": {
+						"@type": "Person",
+						"name": "' . $blog_author . '"
+					},
+					"publisher": {
+						"@type": "' . $co_type . '",
+						"name": "' . $co_name . '",
+						"logo": {
+							"@type": "ImageObject",
+							"url": "' . $co_logo . '"
+						}
+					},
+					"description": "' . $blog_desc . '"
+				}';
+				
+				$blog_element = array(
+					'#type' => 'markup',
+					'#markup' => $blog_markup,
+				);
+				
+				drupal_add_html_head($blog_element, 'blog-gkg');
+		}
+	}
 }
