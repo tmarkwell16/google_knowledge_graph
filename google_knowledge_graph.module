@@ -52,13 +52,84 @@ function google_knowledge_graph_admin_settings() {
 		'#collapsible' => TRUE,
 		'#collapse' => FALSE,
 	);
+	$form['company_info']['co_type'] = array(
+		'#type' => 'select',
+		'#title' => t('Company Type'),
+		'#description' => t('Select the company type that best fits your company'),
+		'#options' => google_knowledge_graph_get_options('co_type'),
+		'#default_value' => variable_get('co_type', 'LocalBusiness'),
+		'#required' => TRUE,
+	);
 	$form['company_info']['co_name'] = array(
 		'#type' => 'textfield',
 		'#title' => t('Company Name'),
 		'#default_value' => variable_get('co_name', ''),
-		'#size' => 60,
-		'#maxlength' => 128,
 		'#required' => TRUE,
+	);
+	$form['company_info']['co_address'] = array(
+		'#type' => 'textfield',
+		'#title' => t('Street Address'),
+		'#default_value' => variable_get('co_address', ''),
+		'#required' => TRUE,
+	);
+	$form['company_info']['co_city'] = array(
+		'#type' => 'textfield',
+		'#title' => t('City'),
+		'#default_value' => variable_get('co_city', ''),
+		'#required' => TRUE,
+	);
+	$form['company_info']['co_state'] = array(
+		'#type' => 'select',
+		'#title' => t('State'),
+		'#options' => google_knowledge_graph_get_options('co_state'),
+		'#default_value' => variable_get('co_state', 'AL'),
+		'#required' => TRUE,
+	);
+	$form['company_info']['co_postalcode'] = array(
+		'#type' => 'textfield',
+		'#title' => t('Zip/Postal Code'),
+		'#default_value' => variable_get('co_postalcode', ''),
+		'#required' => TRUE,
+	);
+	$form['company_info']['co_phone'] = array(
+		'#type' => 'textfield',
+		'#title' => t('Phone'),
+		'#default_value' => variable_get('co_phone', ''),
+		'#required' => TRUE,
+	);
+	$form['company_info']['co_url'] = array(
+		'#type' => 'textfield',
+		'#title' => t('Company Website URL'),
+		'#default_value' => variable_get('co_url', ''),
+		'#required' => TRUE,
+	);
+	$form['company_info']['co_area_type'] = array(
+		'#type' => 'select',
+		'#title' => t('Area Served'),
+		'#description' => t('Choose the type of area your company serves. 
+			Leave blank if you don\'t serve a specific area.'),
+		'#options' => google_knowledge_graph_get_options('co_area_type'),
+		'#default' => variable_get('co_area_type', 0),
+	);
+	$form['company_info']['co_area_served'] = array(
+		'#type' => 'textfield',
+		'#title' => t('Name of Area Served'),
+		'#description' => t('Type in the name of the area your company serves. 
+			Leave blank if you do not wish to list this information in your knowledge graph.'),
+		'#default_value' => variable_get('co_area_served', ''),
+	);
+	$form['company_info']['co_logo'] = array(
+		'#type' => 'textfield',
+		'#title' => t('URL to Company Logo File'),
+		'#description' => t('Enter a fully qualified URL to your company logo file. 
+			Leave the default value if you have a logo uploaded to your current theme.'),
+		'#default_value' => variable_get('co_logo', theme_get_setting('logo')),
+	);
+	$form['company_info']['co_map'] = array(
+		'#type' => 'textfield',
+		'#title' => t('URL to Google Map'),
+		'#description' => t('Enter a fully qualified URL to a Google Map to your company.'),
+		'#default_value' => variable_get('co_map', ''),
 	);
 	$form['submit'] = array(
 		'#type' => 'submit',
@@ -72,6 +143,177 @@ function google_knowledge_graph_admin_settings() {
 // =============================================================
 
 function google_knowledge_graph_admin_settings_submit($form, &$form_state) {
+	variable_set('co_type', $form_state['values']['co_type']);
 	variable_set('co_name', $form_state['values']['co_name']);
+	variable_set('co_address', $form_state['values']['co_address']);
+	variable_set('co_city', $form_state['values']['co_city']);
+	variable_set('co_state', $form_state['values']['co_state']);
+	variable_set('co_postalcode', $form_state['values']['co_postalcode']);
+	variable_set('co_phone', $form_state['values']['co_phone']);
+	variable_set('co_url', $form_state['values']['co_url']);
+	variable_set('co_area_type', $form_state['values']['co_area_type']);
+	variable_set('co_area_served', $form_state['values']['co_area_served']);
+	variable_set('co_logo', $form_state['values']['co_logo']);
+	variable_set('co_map', $form_state['values']['co_map']);
 	drupal_set_message(t('Configuration settings have been saved'));
+}
+
+// ================================================
+// = Provide options lists for select field types =
+// ================================================
+
+function google_knowledge_graph_get_options($list) {
+	if ($list == 'co_type') {
+		$options = array(
+			'LocalBusiness' => 'Local Business',
+			'AnimalShelter' => 'Animal Shelter',
+			'AutomotiveBusiness' => 'Automotive Business',
+			'ChildCare' => 'Child Care',
+			'DryCleaningOrLaundry' => 'Dry Cleaning Or Laundry',
+			'EmergencyService' => 'Emergency Service',
+			'EmploymentAgency' => 'Employment Agency',
+			'EntertainmentBusiness' => 'Entertainment Business',
+			'FinancialService' => 'Financial Service',
+			'FoodEstablishment' => 'Food Establishment',
+			'GovernmentOffice' => 'Government Office',
+			'HealthAndBeautyBusiness' => 'Health And Beauty Business',
+			'HomeAndConstructionBusiness' => 'Home And Construction Business',
+			'InternetCafe' => 'Internet Cafe',
+			'LegalService' => 'Legal Service',
+			'Library' => 'Library',
+			'LodgingBusiness' => 'Lodging Business',
+			'MedicalOrganization' => 'Medical Organization',
+			'ProfessionalService' => 'Professional Service',
+			'RadioStation' => 'Radio Station',
+			'RealEstateAgent' => 'Real Estate Agent',
+			'RecyclingCenter' => 'Recycling Center',
+			'SelfStorage' => 'Self Storage',
+			'ShoppingCenter' => 'Shopping Center',
+			'SportsActivityLocation' => 'Sports Activity Location',
+			'Store' => 'Store',
+			'TelevisionStation' => 'Television Station',
+			'TouristInformationCenter' => 'Tourist Information Center',
+			'TravelAgency' => 'Travel Agency',
+		);
+	} elseif ($list == 'co_state') {
+		$options = array(
+	    'AL'=>'ALABAMA',
+	    'AK'=>'ALASKA',
+	    'AS'=>'AMERICAN SAMOA',
+	    'AZ'=>'ARIZONA',
+	    'AR'=>'ARKANSAS',
+	    'CA'=>'CALIFORNIA',
+	    'CO'=>'COLORADO',
+	    'CT'=>'CONNECTICUT',
+	    'DE'=>'DELAWARE',
+	    'DC'=>'DISTRICT OF COLUMBIA',
+	    'FM'=>'FEDERATED STATES OF MICRONESIA',
+	    'FL'=>'FLORIDA',
+	    'GA'=>'GEORGIA',
+	    'GU'=>'GUAM GU',
+	    'HI'=>'HAWAII',
+	    'ID'=>'IDAHO',
+	    'IL'=>'ILLINOIS',
+	    'IN'=>'INDIANA',
+	    'IA'=>'IOWA',
+	    'KS'=>'KANSAS',
+	    'KY'=>'KENTUCKY',
+	    'LA'=>'LOUISIANA',
+	    'ME'=>'MAINE',
+	    'MH'=>'MARSHALL ISLANDS',
+	    'MD'=>'MARYLAND',
+	    'MA'=>'MASSACHUSETTS',
+	    'MI'=>'MICHIGAN',
+	    'MN'=>'MINNESOTA',
+	    'MS'=>'MISSISSIPPI',
+	    'MO'=>'MISSOURI',
+	    'MT'=>'MONTANA',
+	    'NE'=>'NEBRASKA',
+	    'NV'=>'NEVADA',
+	    'NH'=>'NEW HAMPSHIRE',
+	    'NJ'=>'NEW JERSEY',
+	    'NM'=>'NEW MEXICO',
+	    'NY'=>'NEW YORK',
+	    'NC'=>'NORTH CAROLINA',
+	    'ND'=>'NORTH DAKOTA',
+	    'MP'=>'NORTHERN MARIANA ISLANDS',
+	    'OH'=>'OHIO',
+	    'OK'=>'OKLAHOMA',
+	    'OR'=>'OREGON',
+	    'PW'=>'PALAU',
+	    'PA'=>'PENNSYLVANIA',
+	    'PR'=>'PUERTO RICO',
+	    'RI'=>'RHODE ISLAND',
+	    'SC'=>'SOUTH CAROLINA',
+	    'SD'=>'SOUTH DAKOTA',
+	    'TN'=>'TENNESSEE',
+	    'TX'=>'TEXAS',
+	    'UT'=>'UTAH',
+	    'VT'=>'VERMONT',
+	    'VI'=>'VIRGIN ISLANDS',
+	    'VA'=>'VIRGINIA',
+	    'WA'=>'WASHINGTON',
+	    'WV'=>'WEST VIRGINIA',
+	    'WI'=>'WISCONSIN',
+	    'WY'=>'WYOMING',
+	    'AE'=>'ARMED FORCES AFRICA \ CANADA \ EUROPE \ MIDDLE EAST',
+	    'AA'=>'ARMED FORCES AMERICA (EXCEPT CANADA)',
+	    'AP'=>'ARMED FORCES PACIFIC'
+    );
+	} elseif ($list == 'co_area_type') {
+		$options = array(
+			'Select Area Type' => 'Select Area Type',
+			'city' => 'city',
+			'state' => 'state',
+		);
+	}
+	return $options;
+}
+
+// ==========================================
+// = Add knowledge graph script to the head =
+// ==========================================
+
+function google_knowledge_graph_preprocess_html(&$variables) {
+	$co_type = variable_get('co_type', '');
+	$co_name = variable_get('co_name', '');
+	$co_address = variable_get('co_address', '');
+	$co_city = variable_get('co_city', '');
+	$co_state = variable_set('co_state', '');
+	$co_postalcode = variable_get('co_postalcode', '');
+	$co_phone = variable_get('co_phone', '');
+	$co_url = variable_get('co_url', '');
+	$co_area_type = variable_get('co_area_type', '');
+	$co_area_served = variable_get('co_area_served', '');
+	$co_logo = variable_get('co_logo', '');
+	$co_map = variable_get('co_map', '');
+	$markup = '<script type="application/ld+json">
+		{ "@context": "http://schema.org/",
+			"@type": "' . $co_type . '",
+			"name": "' . $co_name . '",
+			"address": {
+				"@type": "PostalAddress",
+				"addressLocality": "' . $co_city . '",
+				"addressRegion": "' . $co_state . '",
+				"postalCode": "' . $co_postalcode . '",
+				"streetAddress": "' . $co_address . '"
+				},
+			"telephone": "' . $co_phone . '",
+			"url": "' . $co_url . '",';
+	if ($co_area_type !== 'Select Area Type') {
+		$markup .= '"areaServed": {
+				"@type": "' . $co_area_type . '",
+				"name": "' . $co_area_served . '"
+				},';
+	}
+	$markup .= '"maps": "' . $co_map . '",
+			"logo": "' . $co_logo . '"
+			}</script>';
+			
+	$element = array(
+		'#type' => 'markup',
+		'#markup' => $markup,
+	);
+	
+	drupal_add_html_head($element, 'gkg');
 }
