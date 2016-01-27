@@ -41,6 +41,8 @@ function google_knowledge_graph_menu() {
 // =================================
 
 function google_knowledge_graph_admin_settings() {
+	$current_theme = variable_get('theme_default', 'none');
+	
 	$form['description'] = array(
 		'#type' => 'item',
 		'#title' => t('Provide the information below for your company. 
@@ -49,8 +51,7 @@ function google_knowledge_graph_admin_settings() {
 	$form['company_info'] = array(
 		'#type' => 'fieldset',
 		'#title' => t('Company Information'),
-		'#collapsible' => TRUE,
-		'#collapse' => FALSE,
+		'#collapsible' => FALSE,
 	);
 	$form['company_info']['co_type'] = array(
 		'#type' => 'select',
@@ -66,44 +67,83 @@ function google_knowledge_graph_admin_settings() {
 		'#default_value' => variable_get('co_name', ''),
 		'#required' => TRUE,
 	);
-	$form['company_info']['co_address'] = array(
-		'#type' => 'textfield',
-		'#title' => t('Street Address'),
-		'#default_value' => variable_get('co_address', ''),
-		'#required' => TRUE,
-	);
-	$form['company_info']['co_city'] = array(
-		'#type' => 'textfield',
-		'#title' => t('City'),
-		'#default_value' => variable_get('co_city', ''),
-		'#required' => TRUE,
-	);
-	$form['company_info']['co_state'] = array(
-		'#type' => 'select',
-		'#title' => t('State'),
-		'#options' => google_knowledge_graph_get_options('co_state'),
-		'#default_value' => variable_get('co_state', 'AL'),
-		'#required' => TRUE,
-	);
-	$form['company_info']['co_postalcode'] = array(
-		'#type' => 'textfield',
-		'#title' => t('Zip/Postal Code'),
-		'#default_value' => variable_get('co_postalcode', ''),
-		'#required' => TRUE,
-	);
-	$form['company_info']['co_phone'] = array(
-		'#type' => 'textfield',
-		'#title' => t('Phone'),
-		'#default_value' => variable_get('co_phone', ''),
-		'#required' => TRUE,
-	);
 	$form['company_info']['co_url'] = array(
 		'#type' => 'textfield',
 		'#title' => t('Company Website URL'),
 		'#default_value' => variable_get('co_url', ''),
 		'#required' => TRUE,
 	);
-	$form['company_info']['co_area_type'] = array(
+	$form['company_info']['contact_info'] = array(
+		'#type' => 'fieldset',
+		'#title' => t('Contact Information'),
+		'#collapsible' => FALSE,
+	);
+	$form['company_info']['contact_info']['co_address'] = array(
+		'#type' => 'textfield',
+		'#title' => t('Street Address'),
+		'#default_value' => variable_get('co_address', ''),
+		'#required' => TRUE,
+	);
+	$form['company_info']['contact_info']['co_city'] = array(
+		'#type' => 'textfield',
+		'#title' => t('City'),
+		'#default_value' => variable_get('co_city', ''),
+		'#required' => TRUE,
+	);
+	$form['company_info']['contact_info']['co_state'] = array(
+		'#type' => 'select',
+		'#title' => t('State'),
+		'#options' => google_knowledge_graph_get_options('co_state'),
+		'#default_value' => variable_get('co_state', 0),
+		'#required' => TRUE,
+	);
+	$form['company_info']['contact_info']['co_postalcode'] = array(
+		'#type' => 'textfield',
+		'#title' => t('Zip/Postal Code'),
+		'#default_value' => variable_get('co_postalcode', ''),
+		'#required' => TRUE,
+	);
+	$form['company_info']['contact_info']['co_phone'] = array(
+		'#type' => 'textfield',
+		'#title' => t('Phone'),
+		'#default_value' => variable_get('co_phone', ''),
+		'#required' => TRUE,
+	);
+	$form['company_info']['logo_info'] = array(
+		'#type' => 'fieldset',
+		'#title' => t('Logo Information'),
+		'#collapsible' => FALSE,
+	);
+	$form['company_info']['logo_info']['co_logo'] = array(
+		'#type' => 'textfield',
+		'#title' => t('URL to Company Logo File'),
+		'#description' => t('Enter a fully qualified URL to your company logo file. 
+			Leave the default value if you have a logo uploaded to your current theme.'),
+		'#default_value' => variable_get('co_logo', theme_get_setting('logo', $current_theme)),
+		'#required' => TRUE,
+	);
+	$form['company_info']['logo_info']['co_logo_width'] = array(
+		'#type' => 'textfield',
+		'#title' => t('Logo Width'),
+		'#description' => t('Enter the width of your logo image, in pixels.
+			Type the number only, do not include "px."'),
+		'#default_value' => variable_get('co_logo_width', ''),
+		'#required' => TRUE,
+	);
+	$form['company_info']['logo_info']['co_logo_height'] = array(
+		'#type' => 'textfield',
+		'#title' => t('Logo Height'),
+		'#description' => t('Enter the height of your logo image, in pixels.
+			Type the number only, do not include "px."'),
+		'#default_value' => variable_get('co_logo_height', ''),
+		'#required' => TRUE,
+	);
+	$form['company_info']['area_info'] = array(
+		'#type' => 'fieldset',
+		'#title' => t('Area Information'),
+		'#collapsible' => FALSE,
+	);
+	$form['company_info']['area_info']['co_area_type'] = array(
 		'#type' => 'select',
 		'#title' => t('Area Served'),
 		'#description' => t('Choose the type of area your company serves. 
@@ -111,25 +151,18 @@ function google_knowledge_graph_admin_settings() {
 		'#options' => google_knowledge_graph_get_options('co_area_type'),
 		'#default' => variable_get('co_area_type', 0),
 	);
-	$form['company_info']['co_area_served'] = array(
+	$form['company_info']['area_info']['co_area_served'] = array(
 		'#type' => 'textfield',
 		'#title' => t('Name of Area Served'),
 		'#description' => t('Type in the name of the area your company serves. 
 			Leave blank if you do not wish to list this information in your knowledge graph.'),
 		'#default_value' => variable_get('co_area_served', ''),
 	);
-	$form['company_info']['co_logo'] = array(
-		'#type' => 'textfield',
-		'#title' => t('URL to Company Logo File'),
-		'#description' => t('Enter a fully qualified URL to your company logo file. 
-			Leave the default value if you have a logo uploaded to your current theme.'),
-		'#default_value' => variable_get('co_logo', theme_get_setting('logo')),
-		'#required' => TRUE,
-	);
-	$form['company_info']['co_map'] = array(
+	$form['company_info']['area_info']['co_map'] = array(
 		'#type' => 'textfield',
 		'#title' => t('URL to Google Map'),
-		'#description' => t('Enter a fully qualified URL to a Google Map to your company.'),
+		'#description' => 'Enter a fully qualified URL to a Google Map to your company. 
+			Go to <a href="https://www.google.com/maps" target="_blank">Google Maps</a> to get your URL.',
 		'#default_value' => variable_get('co_map', ''),
 	);
 	$form['submit'] = array(
@@ -155,7 +188,10 @@ function google_knowledge_graph_admin_settings_submit($form, &$form_state) {
 	variable_set('co_area_type', $form_state['values']['co_area_type']);
 	variable_set('co_area_served', $form_state['values']['co_area_served']);
 	variable_set('co_logo', $form_state['values']['co_logo']);
+	variable_set('co_logo_width', $form_state['values']['co_logo_width']);
+	variable_set('co_logo_height', $form_state['values']['co_logo_height']);
 	variable_set('co_map', $form_state['values']['co_map']);
+	
 	drupal_set_message(t('Configuration settings have been saved'));
 }
 
@@ -287,6 +323,8 @@ function google_knowledge_graph_preprocess_html(&$variables) {
 	$co_area_type = variable_get('co_area_type', '');
 	$co_area_served = variable_get('co_area_served', '');
 	$co_logo = variable_get('co_logo', '');
+	$co_logo_width = variable_get('co_logo_width', '');
+	$co_logo_height = variable_get('co_logo_height', '');
 	$co_map = variable_get('co_map', '');
 	$co_markup = '<script type="application/ld+json">
 		{ "@context": "http://schema.org/",
@@ -334,14 +372,15 @@ function google_knowledge_graph_preprocess_html(&$variables) {
 			$url_alias = '/' . drupal_get_path_alias('node/'.$nid[2]);
 			$blog_url = $base_url . $url_alias;
 			$blog_title = $node->title;
-			if ($node->field_image) {
-			  $blog_image = file_create_url($node->field_image[LANGUAGE_NONE][0]['uri']);
-			  $blog_image_width = $node->field_image[LANGUAGE_NONE][0]['width'];
-			  $blog_image_height = $node->field_image[LANGUAGE_NONE][0]['height'];
+			$image_field = field_get_items('node', $node, 'field_image');
+			if ($image_field) {
+			  $blog_image = file_create_url($image_field[0]['uri']);
+			  $blog_image_width = $image_field[0]['width'];
+			  $blog_image_height = $image_field[0]['height'];
 			} else {
 				$blog_image = $co_logo;
-				$blog_image_width = '700';
-				$blog_image_height = '700';
+				$blog_image_width = $co_logo_width;
+				$blog_image_height = $co_logo_height;
 			}
 			$blog_pub_date = date('Y-m-dTH:i:s', $node->created);
 			$blog_change_date = date('Y-m-dTH:i:s', $node->changed);
@@ -350,10 +389,11 @@ function google_knowledge_graph_preprocess_html(&$variables) {
 			// We will first check for a meta description field, then fall back to
 			// the body summary, and finally, manually trim the body field to create a description.
 			
-			if ($node->field__meta_description) {
-				$blog_desc = $node->field__meta_description[LANGUAGE_NONE][0]['metatags_quick'];
+			$meta_desc_field = field_get_items('node', $node, 'meta_description');
+			if ($meta_desc_field) {
+				$blog_desc = $meta_desc_field[0]['metatags_quick'];
 			} elseif (!empty($node->body[LANGUAGE_NONE][0]['safe_summary'])) {
-				$blog_desc = $node->body[LANGUAGE_NONE][0]['safe_summary'];
+				$blog_desc = strip_tags($node->body[LANGUAGE_NONE][0]['safe_summary']);
 			} else {
 				$blog_desc = substr(strip_tags($node->body[LANGUAGE_NONE][0]['value']), 0, 160) . '...';
 			}
