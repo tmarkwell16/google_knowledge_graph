@@ -3,6 +3,6 @@ name = Google Knowledge Graph
 description = Gather data and generate JSON-LD code for Google Knowledge Graph, using schema.org schemas.
 core = 7.x
 package = Google
-version = 7.x-1.0-dev
+version = 7.x-1.0-alpha1
 files[] = google_knowledge_graph.module
 configure = admin/config/system/googlekg
