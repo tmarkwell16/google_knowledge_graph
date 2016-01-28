@@ -463,7 +463,7 @@ function google_knowledge_graph_preprocess_html(&$variables) {
 						}
 					},
 					"description": "' . $blog_desc . '"
-				}';
+				}</script>';
 				
 				$blog_element = array(
 					'#type' => 'markup',
