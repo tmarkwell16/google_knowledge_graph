@@ -42,16 +42,36 @@ function google_knowledge_graph_menu() {
 
 function google_knowledge_graph_admin_settings() {
 	$current_theme = variable_get('theme_default', 'none');
+	$fields = field_info_instances('node', 'article');
+	foreach ($fields as $key => $field) {
+		$widget_type = $field['widget']['type'];
+		$widget_type = explode('_', $widget_type);
+		if (in_array('textarea', $widget_type)) {
+			$field_options[$key] = $field['label'];
+		}	
+	}
 	
-	$form['description'] = array(
-		'#type' => 'item',
-		'#title' => t('Provide the information below for your company. 
-			Your Knowledge Graph information will be generated from this information.'),
+	$form['blog_info'] = array(
+		'#type' => 'fieldset',
+		'#title' => t('Article Content Type Information'),
+		'#collapsible' => FALSE,
+	);
+	$form['blog_info']['blog_field_options'] = array(
+		'#type' => 'select',
+		'#title' => t('Select Description Field'),
+		'#description' => t('Select the field you want the Knowledge Graph description info pulled from.'),
+		'#options' => $field_options,
+		'#default_value' => variable_get('blog_field_options'),
 	);
 	$form['company_info'] = array(
 		'#type' => 'fieldset',
 		'#title' => t('Company Information'),
 		'#collapsible' => FALSE,
+	);
+	$form['company_info']['description'] = array(
+		'#type' => 'item',
+		'#title' => t('Provide the information below for your company. 
+			Your Knowledge Graph information will be generated from this information.'),
 	);
 	$form['company_info']['co_type'] = array(
 		'#type' => 'select',
@@ -177,6 +197,7 @@ function google_knowledge_graph_admin_settings() {
 // =============================================================
 
 function google_knowledge_graph_admin_settings_submit($form, &$form_state) {
+	variable_set('blog_field_options', $form_state['values']['blog_field_options']);
 	variable_set('co_type', $form_state['values']['co_type']);
 	variable_set('co_name', $form_state['values']['co_name']);
 	variable_set('co_address', $form_state['values']['co_address']);
@@ -367,6 +388,8 @@ function google_knowledge_graph_preprocess_html(&$variables) {
 			$nid = explode('-', $nid);
 			$node = node_load($nid[2]);
 			$user = user_load($node->uid);
+			$blog_desc_field = variable_get('blog_field_options');
+			$field = field_info_field($blog_desc_field);
 			
 			global $base_url;
 			$url_alias = '/' . drupal_get_path_alias('node/'.$nid[2]);
@@ -386,16 +409,28 @@ function google_knowledge_graph_preprocess_html(&$variables) {
 			$blog_change_date = date('Y-m-dTH:i:s', $node->changed);
 			$blog_author = $user->name;
 			
-			// We will first check for a meta description field, then fall back to
-			// the body summary, and finally, manually trim the body field to create a description.
-			
-			$meta_desc_field = field_get_items('node', $node, 'meta_description');
-			if ($meta_desc_field) {
-				$blog_desc = $meta_desc_field[0]['metatags_quick'];
-			} elseif (!empty($node->body[LANGUAGE_NONE][0]['safe_summary'])) {
-				$blog_desc = strip_tags($node->body[LANGUAGE_NONE][0]['safe_summary']);
-			} else {
-				$blog_desc = substr(strip_tags($node->body[LANGUAGE_NONE][0]['value']), 0, 160) . '...';
+			$desc_field = field_get_items('node', $node, $blog_desc_field);
+			switch ($field['type']) {
+	
+				case 'metatags_quick':
+				$blog_desc = $desc_field[0]['metatags_quick'];
+				$blog_desc = str_replace('"', '\"', $blog_desc);
+				break;
+	
+				case 'text_with_summary':
+				if (!empty($desc_field[0]['safe_summary'])) {
+					$blog_desc = strip_tags($desc_field[0]['safe_summary']);
+					$blog_desc = str_replace('"', '\"', $blog_desc);
+				} else {
+					$blog_desc = substr(strip_tags($desc_field[0]['safe_value']), 0, 160) . '...';
+					$blog_desc = str_replace('"', '\"', $blog_desc);
+				}
+				break;
+	
+				case 'text_long':
+				$blog_desc = substr(strip_tags($desc_field[0]['safe_value']), 0, 160) . '...';
+				$blog_desc = str_replace('"', '\"', $blog_desc);
+				break;
 			}
 			
 			$blog_markup = '<script type="application/ld+json">
