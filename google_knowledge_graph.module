@@ -337,7 +337,7 @@ function google_knowledge_graph_preprocess_html(&$variables) {
 	$co_name = variable_get('co_name', '');
 	$co_address = variable_get('co_address', '');
 	$co_city = variable_get('co_city', '');
-	$co_state = variable_set('co_state', '');
+	$co_state = variable_get('co_state', '');
 	$co_postalcode = variable_get('co_postalcode', '');
 	$co_phone = variable_get('co_phone', '');
 	$co_url = variable_get('co_url', '');
