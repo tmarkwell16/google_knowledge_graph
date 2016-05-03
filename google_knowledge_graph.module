@@ -41,6 +41,7 @@ function google_knowledge_graph_menu() {
 // =================================
 
 function google_knowledge_graph_admin_settings() {
+  global $base_url;
 	$current_theme = variable_get('theme_default', 'none');
 	$fields = field_info_instances('node', 'article');
 	foreach ($fields as $key => $field) {
@@ -84,13 +85,13 @@ function google_knowledge_graph_admin_settings() {
 	$form['company_info']['co_name'] = array(
 		'#type' => 'textfield',
 		'#title' => t('Company Name'),
-		'#default_value' => variable_get('co_name', ''),
+		'#default_value' => variable_get('co_name', variable_get('site_name', "Site Name")),
 		'#required' => TRUE,
 	);
 	$form['company_info']['co_url'] = array(
 		'#type' => 'textfield',
 		'#title' => t('Company Website URL'),
-		'#default_value' => variable_get('co_url', ''),
+		'#default_value' => variable_get('co_url', $base_url),
 		'#required' => TRUE,
 	);
 	$form['company_info']['contact_info'] = array(
@@ -333,6 +334,7 @@ function google_knowledge_graph_get_options($list) {
 // ==========================================
 
 function google_knowledge_graph_preprocess_html(&$variables) {
+  $current_theme = variable_get('theme_default', 'none');
 	$co_type = variable_get('co_type', '');
 	$co_name = variable_get('co_name', '');
 	$co_address = variable_get('co_address', '');
@@ -343,7 +345,7 @@ function google_knowledge_graph_preprocess_html(&$variables) {
 	$co_url = variable_get('co_url', '');
 	$co_area_type = variable_get('co_area_type', '');
 	$co_area_served = variable_get('co_area_served', '');
-	$co_logo = variable_get('co_logo', '');
+	$co_logo = variable_get('co_logo', theme_get_setting('logo', $current_theme));
 	$co_logo_width = variable_get('co_logo_width', '');
 	$co_logo_height = variable_get('co_logo_height', '');
 	$co_map = variable_get('co_map', '');
@@ -413,7 +415,8 @@ function google_knowledge_graph_preprocess_html(&$variables) {
 			switch ($field['type']) {
 	
 				case 'metatags_quick':
-				$blog_desc = $desc_field[0]['metatags_quick'];
+				$blog_desc = !empty($desc_field[0]['metatags_quick']) 
+          ? $desc_field[0]['metatags_quick'] : substr(strip_tags($desc_field[0]['safe_value']), 0, 160) . '...';
 				$blog_desc = str_replace('"', '\"', $blog_desc);
 				break;
 	
